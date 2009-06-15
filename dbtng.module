@@ -9,190 +9,196 @@
  */
 
 
-/**
- * Implementation of hook_autoload_info().
- */
-function dbtng_autoload_info() {
-  global $databases;
-  return array(
-    // database.inc
-    'Database' => array(
-      'file' => 'database/database.inc',
-    ),
-    'DatabaseConnection' => array(
-      'file' => 'database/database.inc',
-    ),
-    'DatabaseStatementBase' => array(
-      'file' => 'database/database.inc',
-    ),
-    'DatabaseStatementInterface' => array(
-      'file' => 'database/database.inc',
-    ),
-    'DatabaseTransaction' => array(
-      'file' => 'database/database.inc',
-    ),
-    'TransactionsNotSupportedException' => array(
-      'file' => 'database/database.inc',
-    ),
-    'NoActiveTransactionException' => array(
-      'file' => 'database/database.inc',
-    ),
-    'ExplicitTransactionsNotSupportedException' => array(
-      'file' => 'database/database.inc',
-    ),
-    'InvalidMergeQueryException' => array(
-      'file' => 'database/database.inc',
-    ),
+ /**
+  * Implementation of hook_autoload_info().
+  */
+ function dbtng_autoload_info() {
+   global $databases;
+   return array(
+     // database.inc
+     'Database' => array(
+       'file' => 'database/database.inc',
+     ),
+     'DatabaseConnection' => array(
+       'file' => 'database/database.inc',
+     ),
+     'DatabaseStatementBase' => array(
+       'file' => 'database/database.inc',
+     ),
+     'DatabaseStatementInterface' => array(
+       'file' => 'database/database.inc',
+     ),
+     'DatabaseTransaction' => array(
+       'file' => 'database/database.inc',
+     ),
+     'TransactionsNotSupportedException' => array(
+       'file' => 'database/database.inc',
+     ),
+     'NoActiveTransactionException' => array(
+       'file' => 'database/database.inc',
+     ),
+     'ExplicitTransactionsNotSupportedException' => array(
+       'file' => 'database/database.inc',
+     ),
+     'InvalidMergeQueryException' => array(
+       'file' => 'database/database.inc',
+     ),
 
-    // log.inc
-    'DatabaseLog' => array(
-      'file' => 'database/log.inc',
-    ),
+     // log.inc
+     'DatabaseLog' => array(
+       'file' => 'database/log.inc',
+     ),
 
-    // prefetch.inc
-    'DatabaseStatementPrefetch' => array(
-      'file' => 'database/prefetch.inc',
-    ),
+     // prefetch.inc
+     'DatabaseStatementPrefetch' => array(
+       'file' => 'database/prefetch.inc',
+     ),
 
-    // query.inc
-    'DatabaseCondition' => array(
-      'file' => 'database/query.inc',
-    ),
-    'DeleteQuery' => array(
-      'file' => 'database/query.inc',
-    ),
-    'InsertQuery' => array(
-      'file' => 'database/query.inc',
-    ),
-    'MergeQuery' => array(
-      'file' => 'database/query.inc',
-    ),
-    'Query' => array(
-      'file' => 'database/query.inc',
-    ),
-    'QueryAlterableInterface' => array(
-      'file' => 'database/query.inc',
-    ),
-    'QueryConditionInterface' => array(
-      'file' => 'database/query.inc',
-    ),
-    'TruncateQuery' => array(
-      'file' => 'database/query.inc',
-    ),
-    'TruncateQuery' => array(
-      'file' => 'database/query.inc',
-    ),
-    'UpdateQuery' => array(
-      'file' => 'database/query.inc',
-    ),
+     // query.inc
+     'DatabaseCondition' => array(
+       'file' => 'database/query.inc',
+     ),
+     'DeleteQuery' => array(
+       'file' => 'database/query.inc',
+     ),
+     'InsertQuery' => array(
+       'file' => 'database/query.inc',
+     ),
+     'MergeQuery' => array(
+       'file' => 'database/query.inc',
+     ),
+     'Query' => array(
+       'file' => 'database/query.inc',
+     ),
+     'QueryAlterableInterface' => array(
+       'file' => 'database/query.inc',
+     ),
+     'QueryConditionInterface' => array(
+       'file' => 'database/query.inc',
+     ),
+     'TruncateQuery' => array(
+       'file' => 'database/query.inc',
+     ),
+     'TruncateQuery' => array(
+       'file' => 'database/query.inc',
+     ),
+     'UpdateQuery' => array(
+       'file' => 'database/query.inc',
+     ),
 
-    // schema.inc
-    'DatabaseSchema' => array(
-      'file' => 'database/schema.inc',
-    ),
+     // schema.inc
+     'DatabaseSchema' => array(
+       'file' => 'database/schema.inc',
+     ),
 
-    // select.inc
-    'QueryExtendableInterface' => array(
-      'file' => 'database/select.inc',
-    ),
-    'SelectQuery' => array(
-      'file' => 'database/select.inc',
-    ),
-    'SelectQueryExtender' => array(
-      'file' => 'database/select.inc',
-    ),
-    'SelectQueryInterface' => array(
-      'file' => 'database/select.inc',
-    ),
+     // select.inc
+     'QueryExtendableInterface' => array(
+       'file' => 'database/select.inc',
+     ),
+     'SelectQuery' => array(
+       'file' => 'database/select.inc',
+     ),
+     'SelectQueryExtender' => array(
+       'file' => 'database/select.inc',
+     ),
+     'SelectQueryInterface' => array(
+       'file' => 'database/select.inc',
+     ),
 
-    // MySQL
+     // MySQL
 
-    // mysql/database.inc
-    'DatabaseConnection_mysql' => array(
-      'file' => 'database/mysql/database.inc',
-    ),
+     // mysql/database.inc
+     'DatabaseConnection_mysql' => array(
+       'file' => 'database/mysql/database.inc',
+     ),
 
-    // mysql/install.inc
-    'DatabaseInstaller_mysql' => array(
-      'file' => 'database/mysql/install.inc',
-    ),
+     // mysql/install.inc
+     'DatabaseInstaller_mysql' => array(
+       'file' => 'database/mysql/install.inc',
+     ),
 
-    // mysql/query.inc
-    'InsertQuery_mysql' => array(
-      'file' => 'database/mysql/query.inc',
-    ),
-    'MergeQuery_mysql' => array(
-      'file' => 'database/mysql/query.inc',
-    ),
+     // mysql/query.inc
+     'InsertQuery_mysql' => array(
+       'file' => 'database/mysql/query.inc',
+     ),
+     'MergeQuery_mysql' => array(
+       'file' => 'database/mysql/query.inc',
+     ),
 
-    // mysql/schema.inc
-    'DatabaseSchema_mysql' => array(
-      'file' => 'database/mysql/schema.inc',
-    ),
-
-
-    // PostgreSQL
-
-    // pgsql/database.inc
-    'DatabaseConnection_pgsql' => array(
-      'file' => 'database/pgsql/database.inc',
-    ),
-
-    // pgsql/install.inc
-    'DatabaseInstaller_pgsql' => array(
-      'file' => 'database/pgsql/install.inc',
-    ),
-
-    // pgsql/query.inc
-    'InsertQuery_pgsql' => array(
-      'file' => 'database/pgsql/query.inc',
-    ),
-    'UpdateQuery_pgsql' => array(
-      'file' => 'database/pgsql/query.inc',
-    ),
-
-    // pgsql/schema.inc
-    'DatabaseSchema_pgsql' => array(
-      'file' => 'database/pgsql/schema.inc',
-    ),
-
-    // SQLite
-
-    // sqlite/database.inc
-    'DatabaseConnection_sqlite' => array(
-      'file' => 'database/sqlite/database.inc',
-    ),
-    'DatabaseStatement_sqlite' => array(
-      'file' => 'database/sqlite/database.inc',
-    ),
-
-    // sqlite/install.inc
-    'DatabaseInstaller_sqlite' => array(
-      'file' => 'database/sqlite/install.inc',
-    ),
-
-    // sqlite/query.inc
-    'DeleteQuery_sqlite' => array(
-      'file' => 'database/sqlite/query.inc',
-    ),
-    'InsertQuery_sqlite' => array(
-      'file' => 'database/sqlite/query.inc',
-    ),
-    'TruncateQuery_sqlite' => array(
-      'file' => 'database/sqlite/query.inc',
-    ),
-    'UpdateQuery_sqlite' => array(
-      'file' => 'database/sqlite/query.inc',
-    ),
-
-    // sqlite/schema.inc
-    'DatabaseSchema_sqlite' => array(
-      'file' => 'database/sqlite/schema.inc',
-    ),
+     // mysql/schema.inc
+     'DatabaseSchema_mysql' => array(
+       'file' => 'database/mysql/schema.inc',
+     ),
 
 
-  );
-}
+     // PostgreSQL
+
+     // pgsql/database.inc
+     'DatabaseConnection_pgsql' => array(
+       'file' => 'database/pgsql/database.inc',
+     ),
+
+     // pgsql/install.inc
+     'DatabaseInstaller_pgsql' => array(
+       'file' => 'database/pgsql/install.inc',
+     ),
+
+     // pgsql/query.inc
+     'InsertQuery_pgsql' => array(
+       'file' => 'database/pgsql/query.inc',
+     ),
+     'UpdateQuery_pgsql' => array(
+       'file' => 'database/pgsql/query.inc',
+     ),
+
+     // pgsql/schema.inc
+     'DatabaseSchema_pgsql' => array(
+       'file' => 'database/pgsql/schema.inc',
+     ),
+
+     // SQLite
+
+     // sqlite/database.inc
+     'DatabaseConnection_sqlite' => array(
+       'file' => 'database/sqlite/database.inc',
+     ),
+     'DatabaseStatement_sqlite' => array(
+       'file' => 'database/sqlite/database.inc',
+     ),
+
+     // sqlite/install.inc
+     'DatabaseInstaller_sqlite' => array(
+       'file' => 'database/sqlite/install.inc',
+     ),
+
+     // sqlite/query.inc
+     'DeleteQuery_sqlite' => array(
+       'file' => 'database/sqlite/query.inc',
+     ),
+     'InsertQuery_sqlite' => array(
+       'file' => 'database/sqlite/query.inc',
+     ),
+     'TruncateQuery_sqlite' => array(
+       'file' => 'database/sqlite/query.inc',
+     ),
+     'UpdateQuery_sqlite' => array(
+       'file' => 'database/sqlite/query.inc',
+     ),
+
+     // sqlite/schema.inc
+     'DatabaseSchema_sqlite' => array(
+       'file' => 'database/sqlite/schema.inc',
+     ),
+
+     // includes
+     'PagerDefault' => array(
+       'file' => 'includes/pager.inc',
+     ),
+     'TableSort' => array(
+       'file' => 'includes/tablesort.inc',
+     ),
+   );
+ }
 
 /**
  * Implementation of hook_init().
@@ -260,7 +266,7 @@ function dbtng_get_db_settings($connect_url) {
  * @return
  *   A new InsertQuery object for this connection.
  */
-function dbtng_insert($table, array $options = array()) {
+function db_insert($table, array $options = array()) {
   if (empty($options['target']) || $options['target'] == 'slave') {
     $options['target'] = 'default';
   }
@@ -277,7 +283,7 @@ function dbtng_insert($table, array $options = array()) {
  * @return
  *   A new MergeQuery object for this connection.
  */
-function dbtng_merge($table, array $options = array()) {
+function db_merge($table, array $options = array()) {
   if (empty($options['target']) || $options['target'] == 'slave') {
     $options['target'] = 'default';
   }
@@ -294,7 +300,7 @@ function dbtng_merge($table, array $options = array()) {
  * @return
  *   A new UpdateQuery object for this connection.
  */
-function dbtng_update($table, array $options = array()) {
+function db_update($table, array $options = array()) {
   if (empty($options['target']) || $options['target'] == 'slave') {
     $options['target'] = 'default';
   }
@@ -311,7 +317,7 @@ function dbtng_update($table, array $options = array()) {
  * @return
  *   A new DeleteQuery object for this connection.
  */
-function dbtng_delete($table, array $options = array()) {
+function db_delete($table, array $options = array()) {
   if (empty($options['target']) || $options['target'] == 'slave') {
     $options['target'] = 'default';
   }
@@ -328,7 +334,7 @@ function dbtng_delete($table, array $options = array()) {
  * @return
  *   A new TruncateQuery object for this connection.
  */
-function dbtng_truncate($table, array $options = array()) {
+function db_truncate($table, array $options = array()) {
   if (empty($options['target']) || $options['target'] == 'slave') {
     $options['target'] = 'default';
   }
@@ -348,7 +354,7 @@ function dbtng_truncate($table, array $options = array()) {
  * @return
  *   A new SelectQuery object for this connection.
  */
-function dbtng_select($table, $alias = NULL, array $options = array()) {
+function db_select($table, $alias = NULL, array $options = array()) {
   if (empty($options['target'])) {
     $options['target'] = 'default';
   }
@@ -368,7 +374,7 @@ function dbtng_select($table, $alias = NULL, array $options = array()) {
  * @return
  *   A new DatabaseTransaction object for this connection.
  */
-function dbtng_transaction($required = FALSE, Array $options = array()) {
+function db_transaction($required = FALSE, Array $options = array()) {
   if (empty($options['target'])) {
     $options['target'] = 'default';
   }
