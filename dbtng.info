@@ -3,3 +3,4 @@ name = DBTNG
 description = Drupal 7 database 
 core = 6.x
 dependencies[] = autoload
+php = 5.2
