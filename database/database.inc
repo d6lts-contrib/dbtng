@@ -454,7 +454,7 @@ abstract class DatabaseConnection extends PDO {
    * @return
    *   A PDO prepared statement ready for its execute() method.
    */
-  protected function prepareQuery($query, $cache = TRUE) {
+  public function prepareQuery($query, $cache = TRUE) {
     $query = $this->prefixTables($query);
     if (empty($this->preparedStatements[$query])) {
       // Call PDO::prepare.
@@ -1361,7 +1361,7 @@ abstract class Database {
 
       // We need to pass around the simpletest database prefix in the request
       // and we put that in the user_agent header.
-      if (preg_match("/^simpletest\d+$/", $_SERVER['HTTP_USER_AGENT'])) {
+      if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^simpletest\d+$/", $_SERVER['HTTP_USER_AGENT'])) {     
         $db_prefix .= $_SERVER['HTTP_USER_AGENT'];
       }
       return $new_connection;

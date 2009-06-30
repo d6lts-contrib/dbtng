@@ -37,6 +37,7 @@ class DatabaseConnection_sqlite extends DatabaseConnection {
     $this->sqliteCreateFunction('greatest', array($this, 'sqlFunctionGreatest'));
     $this->sqliteCreateFunction('pow', 'pow', 2);
     $this->sqliteCreateFunction('length', 'strlen', 1);
+    $this->sqliteCreateFunction('md5', 'md5', 1);
     $this->sqliteCreateFunction('concat', array($this, 'sqlFunctionConcat'));
     $this->sqliteCreateFunction('substring', array($this, 'sqlFunctionSubstring'), 3);
     $this->sqliteCreateFunction('substring_index', array($this, 'sqlFunctionSubstringIndex'), 3);
@@ -157,7 +158,7 @@ class DatabaseConnection_sqlite extends DatabaseConnection {
     return NULL;
   }
 
-  protected function prepareQuery($query, $cache = TRUE) {
+  public function prepareQuery($query, $cache = TRUE) {
     // It makes no sense to use the static prepared statement cache here,
     // because all the work in our implementation is done in
     // DatabaseStatement_sqlite::execute() and cannot be cached.
