@@ -233,6 +233,10 @@ function dbtng_get_db_settings($connect_url) {
 
   $info['scheme'] = ($info['scheme'] == 'mysqli') ? 'mysql' : $info['scheme'];
   $info['path'] = str_replace('/', '', $info['path']);
+  if (empty($info['port'])) {
+    // provide a default port if it's not explicit on $connect_url
+    $info['port'] = getservbyname($info['scheme'], 'tcp');
+  }
 
   $settings = array(
     'driver' => $info['scheme'],
