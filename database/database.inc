@@ -187,16 +187,6 @@
 abstract class DatabaseConnection extends PDO {
 
   /**
-   * Reference to the last statement that was executed.
-   *
-   * We only need this for the legacy db_affected_rows() call, which will be removed.
-   *
-   * @var DatabaseStatementInterface
-   * @todo Remove this variable.
-   */
-  public $lastStatement;
-
-  /**
    * The database target this connection is for.
    *
    * We need this information for later auditing and logging.
@@ -238,7 +228,7 @@ abstract class DatabaseConnection extends PDO {
    *
    * @var boolean
    */
-  protected $willRollBack;
+  protected $willRollback;
 
   /**
    * The name of the Select class for this connection.
@@ -862,12 +852,12 @@ abstract class DatabaseConnection extends PDO {
    *
    * This method throws an exception if no transaction is active.
    */
-  public function rollBack() {
+  public function rollback() {
     if ($this->transactionLayers == 0) {
       throw new NoActiveTransactionException();
     }
 
-    $this->willRollBack = TRUE;
+    $this->willRollback = TRUE;
   }
 
   /**
@@ -880,12 +870,12 @@ abstract class DatabaseConnection extends PDO {
    * @return
    *   TRUE if the transaction will roll back, FALSE otherwise.
    */
-  public function willRollBack() {
+  public function willRollback() {
     if ($this->transactionLayers == 0) {
       throw new NoActiveTransactionException();
     }
 
-    return $this->willRollBack;
+    return $this->willRollback;
   }
 
   /**
@@ -1360,9 +1350,10 @@ abstract class Database {
       }
 
       // We need to pass around the simpletest database prefix in the request
-      // and we put that in the user_agent header.
-      if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^simpletest\d+$/", $_SERVER['HTTP_USER_AGENT'])) {     
-        $db_prefix .= $_SERVER['HTTP_USER_AGENT'];
+      // and we put that in the user_agent header. The header HMAC was already
+      // validated in bootstrap.inc.
+      if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^(simpletest\d+);/", $_SERVER['HTTP_USER_AGENT'], $matches)) {
+        $db_prefix .= $matches[1];
       }
       return $new_connection;
     }
@@ -1426,6 +1417,19 @@ class ExplicitTransactionsNotSupportedException extends Exception { }
 class InvalidMergeQueryException extends Exception {}
 
 /**
+ * Exception thrown if an insert query specifies a field twice.
+ *
+ * It is not allowed to specify a field as default and insert field, this
+ * exception is thrown if that is the case.
+ */
+class FieldsOverlapException extends Exception {}
+
+/**
+ * Exception thrown if an insert query doesn't specify insert or default fields.
+ */
+class NoFieldsException extends Exception {}
+
+/**
  * A wrapper class for creating and managing database transactions.
  *
  * Not all databases or database configurations support transactions. For
@@ -1459,6 +1463,23 @@ class DatabaseTransaction {
 
   public function __destruct() {
     $this->connection->popTransaction();
+  }
+
+  /**
+   * Roll back the current transaction.
+   *
+   * This is just a wrapper method to rollback whatever transaction stack we
+   * are currently in, which is managed by the connection object itself.
+   */
+  public function rollback() {
+    $this->connection->rollback();
+  }
+
+  /**
+   * Determine if this transaction will roll back.
+   */
+  public function willRollback() {
+    return $this->connection->willRollback();
   }
 
 }
@@ -1684,7 +1705,6 @@ class DatabaseStatementBase extends PDOStatement implements DatabaseStatementInt
         $this->setFetchMode($options['fetch']);
       }
     }
-    $this->dbh->lastStatement = $this;
 
     $logger = $this->dbh->getLogger();
     if (!empty($logger)) {
