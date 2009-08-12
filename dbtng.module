@@ -386,6 +386,20 @@ function db_transaction($required = FALSE, Array $options = array()) {
 }
 
 /**
+ * Closes the active database connection.
+ *
+ * @param $options
+ *   An array of options to control which connection is closed.  Only the
+ *   target key has any meaning in this case.
+ */
+function db_close(array $options = array()) {
+  if (empty($options['target'])) {
+    $options['target'] = NULL;
+  }
+  Database::closeConnection($options['target']);
+}
+
+/**
  * Retrieve the name of the currently active database driver, such as
  * "mysql" or "pgsql".
  *
@@ -509,6 +523,12 @@ function dbtng_column_exists($table, $column) {
 function dbtng_find_tables($table_expression) {
   return Database::getConnection()->schema()->findTables($table_expression);
 }
+
+/**
+ * @ingroup schemaapi
+ * @{
+ */
+
 
 function _dbtng_create_keys_sql($spec) {
   return Database::getConnection()->schema()->createKeysSql($spec);
