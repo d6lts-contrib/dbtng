@@ -273,8 +273,8 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
     $this->createTable($ret, $new_table, $new_schema);
     $fields = implode(', ', array_keys($new_schema['fields']));
     $ret[] = update_sql('INSERT INTO {' . $new_table . "} ($fields) SELECT $fields FROM {" . $table . '}');
-    $old_count = db_query('SELECT COUNT(*) FROM {' . $table . '}')->fetchField();
-    $new_count = db_query('SELECT COUNT(*) FROM {' . $new_table . '}')->fetchField();
+    $old_count = dbtng_query('SELECT COUNT(*) FROM {' . $table . '}')->fetchField();
+    $new_count = dbtng_query('SELECT COUNT(*) FROM {' . $new_table . '}')->fetchField();
     if ($old_count == $new_count) {
       do {
         $temp_table = $table . '_' . $i++;
@@ -301,7 +301,7 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
   protected function introspectSchema($table) {
     $mapped_fields = array_flip($this->getFieldTypeMap());
     $schema = array();
-    foreach (db_query("PRAGMA table_info('{" . $table . "}')") as $row) {
+    foreach (dbtng_query("PRAGMA table_info('{" . $table . "}')") as $row) {
       if (preg_match('/^([^(]+)\((.*)\)$/', $row->type, $matches)) {
         $type = $matches[1];
         $length = $matches[2];
@@ -330,7 +330,7 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
       }
     }
     $indexes = array();
-    foreach (db_query("PRAGMA index_list('{" . $table . "}')") as $row) {
+    foreach (dbtng_query("PRAGMA index_list('{" . $table . "}')") as $row) {
       if (strpos($row->name, 'sqlite_autoindex_') !== 0) {
         $indexes[] = array(
           'schema_key' => $row->unique ? 'unique keys' : 'indexes',
@@ -342,7 +342,7 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
     foreach ($indexes as $index) {
       $name = $index['name'];
       $index_name = substr($name, $n);
-      foreach (db_query("PRAGMA index_info('$name')") as $row) {
+      foreach (dbtng_query("PRAGMA index_info('$name')") as $row) {
         $schema[$index['schema_key']][$index_name][] = $row->name;
       }
     }
@@ -571,7 +571,7 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
    */
   public function findTables($table_expression) {
     // Don't use {} around sqlite_master table.
-    $result = db_query("SELECT name FROM sqlite_master WHERE name LIKE :table_name", array(
+    $result = dbtng_query("SELECT name FROM sqlite_master WHERE name LIKE :table_name", array(
       ':table_name' => $table_expression,
     ));
     return $result->fetchAllKeyed(0, 0);

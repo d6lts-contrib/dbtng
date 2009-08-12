@@ -287,7 +287,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     if (isset($spec['initial'])) {
       // All this because update_sql does not support %-placeholders.
       $sql = 'UPDATE {' . $table . '} SET ' . $field . ' = :value';
-      $result = db_query($sql, array(':value' => $spec['initial']));
+      $result = dbtng_query($sql, array(':value' => $spec['initial']));
       $ret[] = array('success' => $result !== FALSE, 'query' => check_plain($sql . ' (' . $spec['initial'] . ')'));
     }
     if ($fixnull) {
@@ -370,11 +370,11 @@ class DatabaseSchema_mysql extends DatabaseSchema {
       $condition->condition('column_name', $column);
       $condition->compile($this->connection);
       // Don't use {} around information_schema.columns table.
-      return db_query("SELECT column_comment FROM information_schema.columns WHERE " . (string) $condition, $condition->arguments())->fetchField();
+      return dbtng_query("SELECT column_comment FROM information_schema.columns WHERE " . (string) $condition, $condition->arguments())->fetchField();
     }
     $condition->compile($this->connection);
     // Don't use {} around information_schema.tables table.
-    $comment = db_query("SELECT table_comment FROM information_schema.tables WHERE " . (string) $condition, $condition->arguments())->fetchField();
+    $comment = dbtng_query("SELECT table_comment FROM information_schema.tables WHERE " . (string) $condition, $condition->arguments())->fetchField();
     // Work-around for MySQL 5.0 bug http://bugs.mysql.com/bug.php?id=11379
     return preg_replace('/; InnoDB free:.*$/', '', $comment);
   }

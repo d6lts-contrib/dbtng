@@ -52,7 +52,7 @@ class DatabaseSchema_pgsql extends DatabaseSchema {
         'sequences' => array(),
       );
       // Don't use {} around information_schema.columns table.
-      $result = db_query("SELECT column_name, data_type, column_default FROM information_schema.columns WHERE table_schema = :schema AND table_name = :table AND (data_type = 'bytea' OR (numeric_precision IS NOT NULL AND column_default LIKE :default))", array(':schema' => $schema, ':table' => $table_name, ':default' => '%nextval%'));
+      $result = dbtng_query("SELECT column_name, data_type, column_default FROM information_schema.columns WHERE table_schema = :schema AND table_name = :table AND (data_type = 'bytea' OR (numeric_precision IS NOT NULL AND column_default LIKE :default))", array(':schema' => $schema, ':table' => $table_name, ':default' => '%nextval%'));
       foreach ($result as $column) {
         if ($column->data_type == 'bytea') {
           $table_information->blob_fields[$column->column_name] = TRUE;
@@ -329,7 +329,7 @@ class DatabaseSchema_pgsql extends DatabaseSchema {
     if (isset($spec['initial'])) {
       // All this because update_sql does not support %-placeholders.
       $sql = 'UPDATE {' . $table . '} SET ' . $field . ' = :value';
-      $result = db_query($sql, array(':value' => $spec['initial']));
+      $result = dbtng_query($sql, array(':value' => $spec['initial']));
       $ret[] = array('success' => $result !== FALSE, 'query' => check_plain($sql . ' (' . $spec['initial'] . ')'));
     }
     if ($fixnull) {
@@ -606,9 +606,9 @@ class DatabaseSchema_pgsql extends DatabaseSchema {
     $table = $this->connection->prefixTables('{' . $table . '}');
     // Don't use {} around pg_class, pg_attribute tables.
     if (isset($column)) {
-      return db_query('SELECT col_description(oid, attnum) FROM pg_class, pg_attribute WHERE attrelid = oid AND relname = ? AND attname = ?', array($table, $column))->fetchField();
+      return dbtng_query('SELECT col_description(oid, attnum) FROM pg_class, pg_attribute WHERE attrelid = oid AND relname = ? AND attname = ?', array($table, $column))->fetchField();
     }
-    return db_query('SELECT obj_description(oid, ?) FROM pg_class WHERE relname = ?', array('pg_class', $table))->fetchField();
+    return dbtng_query('SELECT obj_description(oid, ?) FROM pg_class WHERE relname = ?', array('pg_class', $table))->fetchField();
   }
 }
 

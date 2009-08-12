@@ -32,7 +32,7 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
    */
   protected function checkEncoding() {
     try {
-      if (db_query('SHOW server_encoding')->fetchField() == 'UTF8') { 
+      if (dbtng_query('SHOW server_encoding')->fetchField() == 'UTF8') { 
         $this->pass(st('Database is encoded in UTF-8'));
       }
       else {
@@ -61,39 +61,39 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
 
     try {
       // Create functions.
-      db_query('CREATE OR REPLACE FUNCTION "greatest"(numeric, numeric) RETURNS numeric AS
+      dbtng_query('CREATE OR REPLACE FUNCTION "greatest"(numeric, numeric) RETURNS numeric AS
         \'SELECT CASE WHEN (($1 > $2) OR ($2 IS NULL)) THEN $1 ELSE $2 END;\'
         LANGUAGE \'sql\''
       );
-      db_query('CREATE OR REPLACE FUNCTION "greatest"(numeric, numeric, numeric) RETURNS numeric AS
+      dbtng_query('CREATE OR REPLACE FUNCTION "greatest"(numeric, numeric, numeric) RETURNS numeric AS
         \'SELECT greatest($1, greatest($2, $3));\'
         LANGUAGE \'sql\''
       );
       // Don't use {} around pg_proc table.
-      if (!db_query("SELECT COUNT(*) FROM pg_proc WHERE proname = 'rand'")->fetchField()) {
-        db_query('CREATE OR REPLACE FUNCTION "rand"() RETURNS float AS
+      if (!dbtng_query("SELECT COUNT(*) FROM pg_proc WHERE proname = 'rand'")->fetchField()) {
+        dbtng_query('CREATE OR REPLACE FUNCTION "rand"() RETURNS float AS
           \'SELECT random();\'
           LANGUAGE \'sql\''
         );
       }
 
       // Don't use {} around pg_proc table.
-      if (!db_query("SELECT COUNT(*) FROM pg_proc WHERE proname = 'concat'")->fetchField()) {
-        db_query('CREATE OR REPLACE FUNCTION "concat"(text, text) RETURNS text AS
+      if (!dbtng_query("SELECT COUNT(*) FROM pg_proc WHERE proname = 'concat'")->fetchField()) {
+        dbtng_query('CREATE OR REPLACE FUNCTION "concat"(text, text) RETURNS text AS
           \'SELECT $1 || $2;\'
           LANGUAGE \'sql\''
         );
       }
-      db_query('CREATE OR REPLACE FUNCTION "if"(boolean, text, text) RETURNS text AS
+      dbtng_query('CREATE OR REPLACE FUNCTION "if"(boolean, text, text) RETURNS text AS
         \'SELECT CASE WHEN $1 THEN $2 ELSE $3 END;\'
         LANGUAGE \'sql\''
       );
-      db_query('CREATE OR REPLACE FUNCTION "if"(boolean, integer, integer) RETURNS integer AS
+      dbtng_query('CREATE OR REPLACE FUNCTION "if"(boolean, integer, integer) RETURNS integer AS
         \'SELECT CASE WHEN $1 THEN $2 ELSE $3 END;\'
         LANGUAGE \'sql\''
       );
 
-      db_query('CREATE OR REPLACE FUNCTION "substring_index"(text, text, integer) RETURNS text AS
+      dbtng_query('CREATE OR REPLACE FUNCTION "substring_index"(text, text, integer) RETURNS text AS
         \'SELECT array_to_string((string_to_array($1, $2)) [1:$3], $2);\'
         LANGUAGE \'sql\''
       );
