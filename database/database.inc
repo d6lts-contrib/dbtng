@@ -26,9 +26,10 @@
  * inherits much of its syntax and semantics.
  *
  * Most Drupal database SELECT queries are performed by a call to dbtng_query() or
- * db_query_range(). Module authors should also consider using pager_query() for
- * queries that return results that need to be presented on multiple pages, and
- * tablesort_sql() for generating appropriate queries for sortable tables.
+ * db_query_range(). Module authors should also consider using the PagerDefault
+ * Extender for queries that return results that need to be presented on
+ * multiple pages, and the Tablesort Extender for generating appropriate queries
+ * for sortable tables.
  *
  * For example, one might wish to return a list of the most recent 10 nodes
  * authored by a given user. Instead of directly issuing the SQL query
@@ -946,7 +947,7 @@ abstract class DatabaseConnection extends PDO {
    *   A database query result resource, or NULL if the query was not executed
    *   correctly.
    */
-  abstract public function queryRange($query, array $args, $from, $count, array $options = array());
+  abstract public function queryRange($query, $from, $count, array $args = array(), array $options = array());
 
   /**
    * Generate a temporary table name.
@@ -980,7 +981,7 @@ abstract class DatabaseConnection extends PDO {
    * @return
    *   The name of the temporary table.
    */
-  abstract function queryTemporary($query, array $args, array $options = array());
+  abstract function queryTemporary($query, array $args = array(), array $options = array());
 
   /**
    * Returns the type of database driver.
