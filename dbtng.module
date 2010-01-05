@@ -267,7 +267,7 @@ function dbtng_get_db_settings($connect_url) {
  *   The table into which to insert.
  * @param $options
  *   An array of options to control how the query operates.
- * @return
+ * @return InsertQuery
  *   A new InsertQuery object for this connection.
  */
 function db_insert($table, array $options = array()) {
@@ -284,7 +284,7 @@ function db_insert($table, array $options = array()) {
  *   The table into which to merge.
  * @param $options
  *   An array of options to control how the query operates.
- * @return
+ * @return MergeQuery
  *   A new MergeQuery object for this connection.
  */
 function db_merge($table, array $options = array()) {
@@ -301,7 +301,7 @@ function db_merge($table, array $options = array()) {
  *   The table to update.
  * @param $options
  *   An array of options to control how the query operates.
- * @return
+ * @return UpdateQuery
  *   A new UpdateQuery object for this connection.
  */
 function db_update($table, array $options = array()) {
@@ -318,7 +318,7 @@ function db_update($table, array $options = array()) {
  *   The table from which to delete.
  * @param $options
  *   An array of options to control how the query operates.
- * @return
+ * @return DeleteQuery
  *   A new DeleteQuery object for this connection.
  */
 function db_delete($table, array $options = array()) {
@@ -335,7 +335,7 @@ function db_delete($table, array $options = array()) {
  *   The table from which to delete.
  * @param $options
  *   An array of options to control how the query operates.
- * @return
+ * @return TruncateQuery
  *   A new TruncateQuery object for this connection.
  */
 function db_truncate($table, array $options = array()) {
@@ -355,7 +355,7 @@ function db_truncate($table, array $options = array()) {
  *   The alias for the base table of this query.
  * @param $options
  *   An array of options to control how the query operates.
- * @return
+ * @return SelectQuery
  *   A new SelectQuery object for this connection.
  */
 function db_select($table, $alias = NULL, array $options = array()) {
@@ -370,12 +370,12 @@ function db_select($table, $alias = NULL, array $options = array()) {
  *
  * @param $required
  *   TRUE if the calling code will not function properly without transaction
- *   support.  If set to TRUE and the active database does not support transactions
- *   a TransactionsNotSupportedException exception will be thrown.
+ *   support.  If set to TRUE and the active database does not support
+ *   transactions, a TransactionsNotSupportedException exception will be thrown.
  * @param $options
  *   An array of options to control how the transaction operates.  Only the
  *   target key has any meaning in this case.
- * @return
+ * @return DatabaseTransaction
  *   A new DatabaseTransaction object for this connection.
  */
 function db_transaction($required = FALSE, Array $options = array()) {
@@ -389,8 +389,8 @@ function db_transaction($required = FALSE, Array $options = array()) {
  * Closes the active database connection.
  *
  * @param $options
- *   An array of options to control which connection is closed.  Only the
- *   target key has any meaning in this case.
+ *   An array of options to control which connection is closed.  Only the target
+ *   key has any meaning in this case.
  */
 function db_close(array $options = array()) {
   if (empty($options['target'])) {
@@ -400,8 +400,8 @@ function db_close(array $options = array()) {
 }
 
 /**
- * Retrieve the name of the currently active database driver, such as
- * "mysql" or "pgsql".
+ * Retrieve the name of the currently active database driver, such as "mysql" or
+ * "pgsql".
  *
  * @return The name of the currently active database driver.
  */
@@ -428,7 +428,8 @@ function dbtng_set_active($key = 'default') {
  * yet, even if one could be.
  *
  * @return
- *   TRUE if there is at least one database connection established, FALSE otherwise.
+ *   TRUE if there is at least one database connection established, FALSE
+ *   otherwise.
  */
 function dbtng_is_active() {
   return Database::isActiveConnection();
@@ -504,12 +505,6 @@ function dbtng_find_tables($table_expression) {
   return Database::getConnection()->schema()->findTables($table_expression);
 }
 
-/**
- * @ingroup schemaapi
- * @{
- */
-
-
 function _dbtng_create_keys_sql($spec) {
   return Database::getConnection()->schema()->createKeysSql($spec);
 }
@@ -552,18 +547,16 @@ function dbtng_drop_table($table) {
  * @param $field
  *   Name of the field to be added.
  * @param $spec
- *   The field specification array, as taken from a schema definition.
- *   The specification may also contain the key 'initial', the newly
- *   created field will be set to the value of the key in all rows.
- *   This is most useful for creating NOT NULL columns with no default
- *   value in existing tables.
+ *   The field specification array, as taken from a schema definition. The
+ *   specification may also contain the key 'initial'; the newly-created field
+ *   will be set to the value of the key in all rows. This is most useful for
+ *   creating NOT NULL columns with no default value in existing tables.
  * @param $keys_new
- *   Optional keys and indexes specification to be created on the
- *   table along with adding the field. The format is the same as a
- *   table specification but without the 'fields' element. If you are
- *   adding a type 'serial' field, you MUST specify at least one key
- *   or index including it in this array. See dbtng_change_field() for more
- *   explanation why.
+ *   Optional keys and indexes specification to be created on the table along
+ *   with adding the field. The format is the same as a table specification, but
+ *   without the 'fields' element. If you are adding a type 'serial' field, you
+ *   MUST specify at least one key or index including it in this array. See
+ *   dbtng_change_field() for more explanation why.
  * @see dbtng_change_field()
  */
 function dbtng_add_field($table, $field, $spec, $keys_new = array()) {
@@ -609,22 +602,22 @@ function dbtng_field_set_no_default($table, $field) {
 }
 
 /**
- * Add a primary key.
+ * Adds a primary key to a database table.
  *
  * @param $table
- *   The table to be altered.
+ *   Name of the table to be altered.
  * @param $fields
- *   Fields for the primary key.
+ *   Array of fields for the primary key.
  */
 function dbtng_add_primary_key($table, $fields) {
   return Database::getConnection()->schema()->addPrimaryKey($table, $fields);
 }
 
 /**
- * Drop the primary key.
+ * Drops the primary key of a database table.
  *
  * @param $table
- *   The table to be altered.
+ *   Name of the table to be altered.
  */
 function dbtng_drop_primary_key($table) {
   return Database::getConnection()->schema()->dropPrimaryKey($table);
@@ -690,8 +683,8 @@ function dbtng_drop_index($table, $name) {
  *
  * That means that you have to drop all affected keys and indexes with
  * dbtng_drop_{primary_key,unique_key,index}() before calling dbtng_change_field().
- * To recreate the keys and indices, pass the key definitions as the
- * optional $keys_new argument directly to dbtng_change_field().
+ * To recreate the keys and indices, pass the key definitions as the optional
+ * $keys_new argument directly to dbtng_change_field().
  *
  * For example, suppose you have:
  * @code
@@ -702,8 +695,8 @@ function dbtng_drop_index($table, $name) {
  *   'primary key' => array('bar')
  * );
  * @endcode
- * and you want to change foo.bar to be type serial, leaving it as the
- * primary key. The correct sequence is:
+ * and you want to change foo.bar to be type serial, leaving it as the primary
+ * key. The correct sequence is:
  * @code
  * dbtng_drop_primary_key('foo');
  * dbtng_change_field('foo', 'bar', 'bar',
@@ -713,34 +706,34 @@ function dbtng_drop_index($table, $name) {
  *
  * The reasons for this are due to the different database engines:
  *
- * On PostgreSQL, changing a field definition involves adding a new field
- * and dropping an old one which* causes any indices, primary keys and
- * sequences (from serial-type fields) that use the changed field to be dropped.
+ * On PostgreSQL, changing a field definition involves adding a new field and
+ * dropping an old one which causes any indices, primary keys and sequences
+ * (from serial-type fields) that use the changed field to be dropped.
  *
- * On MySQL, all type 'serial' fields must be part of at least one key
- * or index as soon as they are created. You cannot use
- * dbtng_add_{primary_key,unique_key,index}() for this purpose because
- * the ALTER TABLE command will fail to add the column without a key
- * or index specification. The solution is to use the optional
- * $keys_new argument to create the key or index at the same time as
- * field.
+ * On MySQL, all type 'serial' fields must be part of at least one key or index
+ * as soon as they are created. You cannot use
+ * dbtng_add_{primary_key,unique_key,index}() for this purpose because the ALTER
+ * TABLE command will fail to add the column without a key or index
+ * specification. The solution is to use the optional $keys_new argument to
+ * create the key or index at the same time as field.
  *
- * You could use dbtng_add_{primary_key,unique_key,index}() in all cases
- * unless you are converting a field to be type serial. You can use
- * the $keys_new argument in all cases.
+ * You could use dbtng_add_{primary_key,unique_key,index}() in all cases unless you
+ * are converting a field to be type serial. You can use the $keys_new argument
+ * in all cases.
  *
  * @param $table
  *   Name of the table.
  * @param $field
  *   Name of the field to change.
  * @param $field_new
- *   New name for the field (set to the same as $field if you don't want to change the name).
+ *   New name for the field (set to the same as $field if you don't want to
+ *   change the name).
  * @param $spec
  *   The field specification for the new field.
  * @param $keys_new
- *   Optional keys and indexes specification to be created on the
- *   table along with changing the field. The format is the same as a
- *   table specification but without the 'fields' element.
+ *   Optional keys and indexes specification to be created on the table along
+ *   with changing the field. The format is the same as a table specification
+ *   but without the 'fields' element.
  */
 function dbtng_change_field($table, $field, $field_new, $spec, $keys_new = array()) {
   return Database::getConnection()->schema()->changeField($table, $field, $field_new, $spec, $keys_new);
@@ -755,9 +748,9 @@ function dbtng_change_field($table, $field, $field_new, $spec, $keys_new = array
  *
  * @see DatabaseConnection::defaultOptions()
  * @param $query
- *   The prepared statement query to run. Although it will accept both
- *   named and unnamed placeholders, named placeholders are strongly preferred
- *   as they are more self-documenting.
+ *   The prepared statement query to run. Although it will accept both named and
+ *   unnamed placeholders, named placeholders are strongly preferred as they are
+ *   more self-documenting.
  * @param $args
  *   An array of values to substitute into the query. If the query uses named
  *   placeholders, this is an associative array in any order. If the query uses
@@ -765,7 +758,7 @@ function dbtng_change_field($table, $field, $field_new, $spec, $keys_new = array
  *   the order of placeholders in the query string.
  * @param $options
  *   An array of options to control how the query operates.
- * @return
+ * @return DatabaseStatementInterface
  *   A prepared statement object, already executed.
  */
 function dbtng_query($query, array $args = array(), array $options = array()) {
@@ -778,4 +771,15 @@ function dbtng_query($query, array $args = array(), array $options = array()) {
 
 /**
  * @} End of "defgroup dbtng".
+ *//**
+ * Check if an index exists.
+ *
+ * @param $name
+ *   Index name.
+ * @return
+ *   TRUE if the given index exists, otherwise FALSE.
  */
+function dbtng_index_exists($name) {
+  return Database::getConnection()->schema()->indexExists($name);
+}
+
