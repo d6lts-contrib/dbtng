@@ -26,7 +26,7 @@ API
 ___
 
 This module uses an identical API to the Drupal 7 database layer, with the
-exception that functions have been renamed to use dbtng_ as a prefix instead
+exception that some functions have been renamed to use dbtng_ as a prefix instead
 of db_.
 
 
