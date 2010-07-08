@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Drupal 7 database 
+ * Drupal 7 database
  * @author Michael Prasuhn <mike@shomeya.com>
  * @link http://shomeya.com
  */
@@ -74,6 +74,9 @@
        'file' => 'database/query.inc',
      ),
      'QueryConditionInterface' => array(
+       'file' => 'database/query.inc',
+     ),
+     'QueryPlaceholderInterface' => array(
        'file' => 'database/query.inc',
      ),
      'TruncateQuery' => array(
