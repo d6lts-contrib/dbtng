@@ -43,6 +43,14 @@ class PagerDefault extends SelectQueryExtender {
    */
   protected $customCountQuery = FALSE;
 
+  public function __construct(SelectQueryInterface $query, DatabaseConnection $connection) {
+    parent::__construct($query, $connection);
+
+    // Add pager tag. Do this here to ensure that it is always added before
+    // preExecute() is called.
+    $this->addTag('pager');
+  }
+
   /**
    * Override the execute method.
    *
@@ -50,7 +58,14 @@ class PagerDefault extends SelectQueryExtender {
    * to it.
    */
   public function execute() {
-    global $pager_page_array, $pager_total, $pager_total_items;
+    global $pager_page_array, $pager_total, $pager_total_items, $pager_limits;
+
+    // Add convenience tag to mark that this is an extended query. We have to
+    // do this in the constructor to ensure that it is set before preExecute()
+    // gets called.
+    if (!$this->preExecute($this)) {
+      return NULL;
+    }
 
     // A NULL limit is the "kill switch" for pager queries.
     if (empty($this->limit)) {
@@ -70,7 +85,8 @@ class PagerDefault extends SelectQueryExtender {
     // We calculate the total of pages as ceil(items / limit).
     $pager_total_items[$this->element] = $this->getCountQuery()->execute()->fetchField();
     $pager_total[$this->element] = ceil($pager_total_items[$this->element] / $this->limit);
-    $pager_page_array[$this->element] = max(0, min((int)$pager_page_array[$this->element], ((int)$pager_total[$this->element]) - 1));
+    $pager_page_array[$this->element] = max(0, min((int) $pager_page_array[$this->element], ((int) $pager_total[$this->element]) - 1));
+    $pager_limits[$this->element] = $this->limit;
     $this->range($pager_page_array[$this->element] * $this->limit, $this->limit);
 
     // Now that we've added our pager-based range instructions, run the query normally.
@@ -111,8 +127,8 @@ class PagerDefault extends SelectQueryExtender {
    * The count query may be specified manually or, by default, taken from the
    * query we are extending.
    *
-   * @return
-   *   A count SelectQueryInterface object.
+   * @return SelectQueryInterface
+   *   A count query object.
    */
   protected function getCountQuery() {
     if ($this->customCountQuery) {
@@ -154,3 +170,17 @@ class PagerDefault extends SelectQueryExtender {
   }
 }
 
+/**
+ * Compose a URL query parameter array for pager links.
+ *
+ * @return
+ *   A URL query parameter array that consists of all components of the current
+ *   page request except for those pertaining to paging.
+ */
+function pager_get_query_parameters() {
+  $query = &drupal_static(__FUNCTION__);
+  if (!isset($query)) {
+    $query = drupal_get_query_parameters($_GET, array('q', 'page'));
+  }
+  return $query;
+}

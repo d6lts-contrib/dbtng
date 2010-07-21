@@ -22,10 +22,24 @@ class TableSort extends SelectQueryExtender {
    */
   protected $header = array();
 
-  public function execute() {
-    return $this->query->execute();
+  public function __construct(SelectQueryInterface $query, DatabaseConnection $connection) {
+    parent::__construct($query, $connection);
+
+    // Add convenience tag to mark that this is an extended query. We have to
+    // do this in the constructor to ensure that it is set before preExecute()
+    // gets called.
+    $this->addTag('tablesort');
   }
 
+  /**
+   * Order the query based on a header array.
+   *
+   * @see theme_table()
+   * @param $header
+   *   Table header array.
+   * @return SelectQueryInterface
+   *   The called object.
+   */
   public function orderByHeader(Array $header) {
     $this->header = $header;
     $ts = $this->init();
@@ -47,7 +61,7 @@ class TableSort extends SelectQueryExtender {
   protected function init() {
     $ts = $this->order();
     $ts['sort'] = $this->getSort();
-    $ts['query_string'] = $this->getQueryString();
+    $ts['query'] = $this->getQueryParameters();
     return $ts;
   }
 
@@ -75,14 +89,16 @@ class TableSort extends SelectQueryExtender {
   }
 
   /**
-   * Compose a query string to append to table sorting requests.
+   * Compose a URL query parameter array to append to table sorting requests.
    *
    * @return
-   *   A query string that consists of all components of the current page request
-   *   except for those pertaining to table sorting.
+   *   A URL query parameter array that consists of all components of the current
+   *   page request except for those pertaining to table sorting.
+   *
+   * @see tablesort_get_query_parameters()
    */
-  protected function getQueryString() {
-    return drupal_query_string_encode($_REQUEST, array_merge(array('q', 'sort', 'order'), array_keys($_COOKIE)));
+  protected function getQueryParameters() {
+    return tablesort_get_query_parameters();
   }
 
   /**
@@ -121,4 +137,15 @@ class TableSort extends SelectQueryExtender {
       }
     }
   }
+}
+
+/**
+ * Compose a URL query parameter array for table sorting links.
+ *
+ * @return
+ *   A URL query parameter array that consists of all components of the current
+ *   page request except for those pertaining to table sorting.
+ */
+function tablesort_get_query_parameters() {
+  return drupal_get_query_parameters($_GET, array('q', 'sort', 'order'));
 }
