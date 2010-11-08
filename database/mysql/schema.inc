@@ -132,7 +132,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   protected function createFieldSql($name, $spec) {
     $sql = "`" . $name . "` " . $spec['mysql_type'];
 
-    if (in_array($spec['type'], array('varchar', 'char', 'text')) && isset($spec['length'])) {
+    if (in_array($spec['mysql_type'], array('VARCHAR', 'CHAR', 'TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT', 'TEXT')) && isset($spec['length'])) {
       $sql .= '(' . $spec['length'] . ')';
     }
     elseif (isset($spec['precision']) && isset($spec['scale'])) {
@@ -143,8 +143,13 @@ class DatabaseSchema_mysql extends DatabaseSchema {
       $sql .= ' unsigned';
     }
 
-    if (!empty($spec['not null'])) {
-      $sql .= ' NOT NULL';
+    if (isset($spec['not null'])) {
+      if ($spec['not null']) {
+        $sql .= ' NOT NULL';
+      }
+      else {
+        $sql .= ' NULL';
+      }
     }
 
     if (!empty($spec['auto_increment'])) {
@@ -156,7 +161,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
       if (is_string($spec['default'])) {
         $spec['default'] = "'" . $spec['default'] . "'";
       }
-      elseif (is_null($spec['default'])) {
+      elseif (!isset($spec['default'])) {
         $spec['default'] = 'NULL';
       }
       $sql .= ' DEFAULT ' . $spec['default'];
@@ -187,12 +192,16 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     }
 
     // Set the correct database-engine specific datatype.
-    if (!isset($field['mysql_type'])) {
+    // In case one is already provided, force it to uppercase.
+    if (isset($field['mysql_type'])) {
+      $field['mysql_type'] = drupal_strtoupper($field['mysql_type']);
+    }
+    else {
       $map = $this->getFieldTypeMap();
       $field['mysql_type'] = $map[$field['type'] . ':' . $field['size']];
     }
 
-    if ($field['type'] == 'serial') {
+    if (isset($field['type']) && $field['type'] == 'serial') {
       $field['auto_increment'] = TRUE;
     }
 
@@ -351,7 +360,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot set default value of field %table.%field: field doesn't exist.", array('%table' => $table, '%field' => $field)));
     }
 
-    if (is_null($default)) {
+    if (!isset($default)) {
       $default = 'NULL';
     }
     else {

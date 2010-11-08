@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Drupal 7 database 
+ * Drupal 7 database
  * @author Michael Prasuhn <mike@shomeya.com>
  * @link http://shomeya.com
  */
@@ -37,6 +37,7 @@ function dbtng_init() {
  * Helper function to parse a Drupal 6 style DB connection URL.
  */
 function dbtng_get_db_settings($connect_url) {
+  global $db_prefix;
   $info = parse_url($connect_url);
 
   $info['scheme'] = ($info['scheme'] == 'mysqli') ? 'mysql' : $info['scheme'];
@@ -52,7 +53,8 @@ function dbtng_get_db_settings($connect_url) {
     'username' => urldecode($info['user']),
     'password' => @urldecode($info['pass']),
     'host' => urldecode($info['host']),
-    'port' => $info['port']
+    'port' => $info['port'],
+    'prefix' => !empty($db_prefix) ? $db_prefix : '',
   );
   return $settings;
 }
@@ -624,9 +626,12 @@ function dbtng_change_field($table, $field, $field_new, $spec, $keys_new = array
 /**
  * Executes an arbitrary query string against the active database.
  *
+ * Use this function for SELECT queries if it is just a simple query string.
+ * If the caller or other modules need to change the query, use dbtng_select()
+ * instead.
+ *
  * Do not use this function for INSERT, UPDATE, or DELETE queries. Those should
- * be handled via the appropriate query builder factory. Use this function for
- * SELECT queries that do not require a query builder.
+ * be handled via dbtng_insert(), dbtng_update() and dbtng_delete() respectively.
  *
  * @param $query
  *   The prepared statement query to run. Although it will accept both named and

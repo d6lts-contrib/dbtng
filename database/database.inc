@@ -44,7 +44,7 @@
  * @code
  * $result = db_query_range('SELECT n.nid, n.title, n.created
  *   FROM {node} n WHERE n.uid = :uid', 0, 10, array(':uid' => $uid));
- * foreach($result as $record) {
+ * foreach ($result as $record) {
  *   // Perform operations on $node->title, etc. here.
  * }
  * @endcode
@@ -53,7 +53,8 @@
  * out into an argument passed to dbtng_query() so that SQL injection attacks
  * from user input can be caught and nullified. The LIMIT syntax varies between
  * database servers, so that is abstracted into db_query_range() arguments.
- * Finally, note the PDO-based ability to foreach() over the result set.
+ * Finally, note the PDO-based ability to iterate over the result set using
+ * foreach ().
  *
  * All queries are passed as a prepared statement string. A
  * prepared statement is a "template" of a query that omits literal or variable
@@ -169,6 +170,8 @@
  *   }
  * }
  * @endcode
+ *
+ * @link http://drupal.org/developing/api/database
  */
 
 
@@ -818,6 +821,7 @@ abstract class DatabaseConnection extends PDO {
    * Force all alias names to be strictly alphanumeric-plus-underscore. In
    * contrast to DatabaseConnection::escapeField() /
    * DatabaseConnection::escapeTable(), this doesn't allow the period (".")
+   * because that is not allowed in aliases.
    *
    * @return
    *   The sanitized field name string.
@@ -1068,7 +1072,9 @@ abstract class DatabaseConnection extends PDO {
   /**
    * Returns the version of the database server.
    */
-  abstract public function version();
+  public function version() {
+    return $this->getAttribute(PDO::ATTR_SERVER_VERSION);
+  }
 
   /**
    * Determines if this driver supports transactions.
@@ -1289,6 +1295,9 @@ abstract class Database {
 
   /**
    * Gets the connection object for the specified database key and target.
+   *
+   * Note: do not use the setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE) on the
+   * returned object because of http://bugs.php.net/bug.php?id=43139.
    *
    * @param $target
    *   The database target name.
