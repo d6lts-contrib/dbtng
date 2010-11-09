@@ -1366,6 +1366,10 @@ abstract class Database {
   final public static function parseConnectionInfo() {
     global $databases;
 
+    if (empty($databases)) {
+      dbtng_load_connection_info();
+    }
+
     $database_info = is_array($databases) ? $databases : array();
     foreach ($database_info as $index => $info) {
       foreach ($database_info[$index] as $target => $value) {
