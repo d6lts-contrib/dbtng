@@ -83,7 +83,7 @@ function database_test_menu() {
  */
 function database_test_db_query_temporary() {
   $table_name = db_query_temporary('SELECT status FROM {system}', array());
-  drupal_json_output(array(
+  drupal_json(array(
     'table_name' => $table_name,
     'row_count' => db_select($table_name)->countQuery()->execute()->fetchField(),
   ));
@@ -108,7 +108,7 @@ function database_test_even_pager_query($limit) {
 
   $names = $query->execute()->fetchCol();
 
-  drupal_json_output(array(
+  drupal_json(array(
     'names' => $names,
   ));
   exit;
@@ -132,7 +132,7 @@ function database_test_odd_pager_query($limit) {
 
   $names = $query->execute()->fetchCol();
 
-  drupal_json_output(array(
+  drupal_json(array(
     'names' => $names,
   ));
   exit;
@@ -161,7 +161,7 @@ function database_test_tablesort() {
   // We need all the results at once to check the sort.
   $tasks = $query->execute()->fetchAll();
 
-  drupal_json_output(array(
+  drupal_json(array(
     'tasks' => $tasks,
   ));
   exit;
@@ -190,7 +190,7 @@ function database_test_tablesort_first() {
   // We need all the results at once to check the sort.
   $tasks = $query->execute()->fetchAll();
 
-  drupal_json_output(array(
+  drupal_json(array(
     'tasks' => $tasks,
   ));
   exit;
