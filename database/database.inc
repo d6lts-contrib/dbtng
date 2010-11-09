@@ -1366,7 +1366,7 @@ abstract class Database {
   final public static function parseConnectionInfo() {
     global $databases;
 
-    if (empty($databases)) {
+    if (empty(self::$databaseInfo)) {
       dbtng_load_connection_info();
     }
 
