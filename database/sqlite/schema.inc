@@ -673,7 +673,7 @@ class DatabaseSchema_sqlite extends DatabaseSchema {
 
     // Can't use query placeholders because the query would have to be
     // :prefixsqlite_master, which does not work.
-    $result = db_query("SELECT name FROM " . $info['schema'] . ".sqlite_master WHERE name LIKE :table_name", array(
+    $result = dbtng_query("SELECT name FROM " . $info['schema'] . ".sqlite_master WHERE name LIKE :table_name", array(
       ':table_name' => $info['table'],
     ));
     return $result->fetchAllKeyed(0, 0);
