@@ -1187,7 +1187,7 @@ abstract class DatabaseConnection extends PDO {
    * value. Or sometimes you just need a unique integer.
    *
    * @param $existing_id
-   *   After a database import, it might be that the sequences table is behind,
+   *   After a database import, it might be that the dbtng_sequences table is behind,
    *   so by passing in the maximum existing id, it can be assured that we
    *   never issue the same id.
    *
