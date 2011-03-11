@@ -6,7 +6,6 @@
 function dbtng_enable() {
   // Clear all cache as recommended by autoload.
   cache_clear_all();
-  autoload_registry_update();
   drupal_install_schema('dbtng');
   db_query("INSERT INTO {dbtng_sequences} VALUES (1);");
 }
