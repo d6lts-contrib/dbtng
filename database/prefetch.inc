@@ -9,7 +9,7 @@
  */
 
 /**
- * @ingroup dbtng
+ * @ingroup database
  * @{
  */
 
@@ -498,6 +498,6 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
 }
 
 /**
- * @} End of "ingroup dbtng".
+ * @} End of "ingroup database".
  */
 

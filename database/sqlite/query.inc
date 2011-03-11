@@ -6,19 +6,9 @@
  */
 
 /**
- * @ingroup dbtng
+ * @ingroup database
  * @{
  */
-
-/**
- * SQLite specific query builder for SELECT statements.
- */
-class SelectQuery_sqlite extends SelectQuery {
-  public function forUpdate($set = TRUE) {
-    // SQLite does not support FOR UPDATE so nothing to do.
-    return $this;
-  }
-}
 
 /**
  * SQLite specific implementation of InsertQuery.
@@ -106,7 +96,7 @@ class UpdateQuery_sqlite extends UpdateQuery {
     foreach ($fields as $field => $data) {
       if (is_array($data)) {
         // The field is an expression.
-        $condition->condition($field, $data['expression'], '<>');
+        $condition->where($field . ' <> ' . $data['expression']);
         $condition->isNull($field);
       }
       elseif (!isset($data)) {
@@ -166,5 +156,5 @@ class TruncateQuery_sqlite extends TruncateQuery {
 }
 
 /**
- * @} End of "ingroup dbtng".
+ * @} End of "ingroup database".
  */

@@ -21,13 +21,21 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
       'arguments' => array(),
     );
     $this->tasks[] = array(
+      'function' => 'checkBinaryOutput',
+      'arguments' => array(),
+    );
+    $this->tasks[] = array(
       'function' => 'initializeDatabase',
       'arguments' => array(),
     );
   }
 
   public function name() {
-    return 'PostgreSQL';
+    return st('PostgreSQL');
+  }
+
+  public function minimumVersion() {
+    return '8.3';
   }
 
   /**
@@ -35,7 +43,7 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
    */
   protected function checkEncoding() {
     try {
-      if (dbtng_query('SHOW server_encoding')->fetchField() == 'UTF8') {
+      if (db_query('SHOW server_encoding')->fetchField() == 'UTF8') {
         $this->pass(st('Database is encoded in UTF-8'));
       }
       else {
@@ -48,7 +56,8 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
         $text .= 'Recreate the database with %encoding encoding. See !link for more details.';
         $this->fail(st($text, $replacements));
       }
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       $this->fail(st('Drupal could not determine the encoding of the database was set to UTF-8'));
     }
   }
@@ -71,6 +80,60 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
   }
 
   /**
+   * Check Binary Output.
+   *
+   * Unserializing does not work on Postgresql 9 when bytea_output is 'hex'.
+   */
+  function checkBinaryOutput() {
+    // PostgreSQL < 9 doesn't support bytea_output, so verify we are running
+    // at least PostgreSQL 9.
+    $database_connection = Database::getConnection();
+    if (version_compare($database_connection->version(), '9') >= 0) {
+      if (!$this->checkBinaryOutputSuccess()) {
+        // First try to alter the database. If it fails, raise an error telling
+        // the user to do it themselves.
+        $connection_options = $database_connection->getConnectionOptions();
+        // It is safe to include the database name directly here, because this
+        // code is only called when a connection to the database is already
+        // established, thus the database name is guaranteed to be a correct
+        // value.
+        $query = "ALTER DATABASE \"" . $connection_options['database'] . "\" SET bytea_output = 'escape';";
+        try {
+          db_query($query);
+        }
+        catch (Exception $e) {
+          // Ignore possible errors when the user doesn't have the necessary
+          // privileges to ALTER the database.
+        }
+
+        // Close the database connection so that the configuration parameter
+        // is applied to the current connection.
+        db_close();
+
+        // Recheck, if it fails, finally just rely on the end user to do the
+        // right thing.
+        if (!$this->checkBinaryOutputSuccess()) {
+          $replacements = array(
+            '%setting' => 'bytea_output',
+            '%current_value' => 'hex',
+            '%needed_value' => 'escape',
+            '!query' => "<code>" . $query . "</code>",
+          );
+          $this->fail(st("The %setting setting is currently set to '%current_value', but needs to be '%needed_value'. Change this by running the following query: !query", $replacements));
+        }
+      }
+    }
+  }
+
+  /**
+   * Verify that a binary data roundtrip returns the original string.
+   */
+  protected function checkBinaryOutputSuccess() {
+    $bytea_output = db_query("SELECT 'encoding'::bytea AS output")->fetchField();
+    return ($bytea_output == 'encoding');
+  }
+
+  /**
    * Make PostgreSQL Drupal friendly.
    */
   function initializeDatabase() {
@@ -81,23 +144,23 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
 
     try {
       // Create functions.
-      dbtng_query('CREATE OR REPLACE FUNCTION "greatest"(numeric, numeric) RETURNS numeric AS
+      db_query('CREATE OR REPLACE FUNCTION "greatest"(numeric, numeric) RETURNS numeric AS
         \'SELECT CASE WHEN (($1 > $2) OR ($2 IS NULL)) THEN $1 ELSE $2 END;\'
         LANGUAGE \'sql\''
       );
-      dbtng_query('CREATE OR REPLACE FUNCTION "greatest"(numeric, numeric, numeric) RETURNS numeric AS
+      db_query('CREATE OR REPLACE FUNCTION "greatest"(numeric, numeric, numeric) RETURNS numeric AS
         \'SELECT greatest($1, greatest($2, $3));\'
         LANGUAGE \'sql\''
       );
       // Don't use {} around pg_proc table.
-      if (!dbtng_query("SELECT COUNT(*) FROM pg_proc WHERE proname = 'rand'")->fetchField()) {
-        dbtng_query('CREATE OR REPLACE FUNCTION "rand"() RETURNS float AS
+      if (!db_query("SELECT COUNT(*) FROM pg_proc WHERE proname = 'rand'")->fetchField()) {
+        db_query('CREATE OR REPLACE FUNCTION "rand"() RETURNS float AS
           \'SELECT random();\'
           LANGUAGE \'sql\''
         );
       }
 
-      dbtng_query('CREATE OR REPLACE FUNCTION "substring_index"(text, text, integer) RETURNS text AS
+      db_query('CREATE OR REPLACE FUNCTION "substring_index"(text, text, integer) RETURNS text AS
         \'SELECT array_to_string((string_to_array($1, $2)) [1:$3], $2);\'
         LANGUAGE \'sql\''
       );
@@ -107,19 +170,19 @@ class DatabaseTasks_pgsql extends DatabaseTasks {
       // they do support CONCAT(item1, item2) which we can replicate in
       // PostgreSQL. PostgreSQL requires the function to be defined for each
       // different argument variation the function can handle.
-      dbtng_query('CREATE OR REPLACE FUNCTION "concat"(anynonarray, anynonarray) RETURNS text AS
+      db_query('CREATE OR REPLACE FUNCTION "concat"(anynonarray, anynonarray) RETURNS text AS
         \'SELECT CAST($1 AS text) || CAST($2 AS text);\'
         LANGUAGE \'sql\'
       ');
-      dbtng_query('CREATE OR REPLACE FUNCTION "concat"(text, anynonarray) RETURNS text AS
+      db_query('CREATE OR REPLACE FUNCTION "concat"(text, anynonarray) RETURNS text AS
         \'SELECT $1 || CAST($2 AS text);\'
         LANGUAGE \'sql\'
       ');
-      dbtng_query('CREATE OR REPLACE FUNCTION "concat"(anynonarray, text) RETURNS text AS
+      db_query('CREATE OR REPLACE FUNCTION "concat"(anynonarray, text) RETURNS text AS
         \'SELECT CAST($1 AS text) || $2;\'
         LANGUAGE \'sql\'
       ');
-      dbtng_query('CREATE OR REPLACE FUNCTION "concat"(text, text) RETURNS text AS
+      db_query('CREATE OR REPLACE FUNCTION "concat"(text, text) RETURNS text AS
         \'SELECT $1 || $2;\'
         LANGUAGE \'sql\'
       ');
