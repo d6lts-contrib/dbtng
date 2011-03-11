@@ -1,4 +1,5 @@
 <?php
+// $Id: dbtng.module,v 1.2 2009/06/05 03:42:56 mikeyp Exp $
 
 /**
  * @file
@@ -59,10 +60,88 @@ function dbtng_get_db_settings($connect_url) {
 }
 
 /**
- * @defgroup dbtng PDO Database abstraction layer
- * @{
+ * Backport of D7's drupal_alter(), which allows hook_query_alter() and
+ * hook_query_TAG_alter() to work properly.
  */
+function dbtng_drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL) {
+  // Use the advanced drupal_static() pattern, since this is called very often.
+  static $drupal_static_fast;
+  if (!isset($drupal_static_fast)) {
+    $drupal_static_fast['functions'] = NULL;
+  }
+  $functions = &$drupal_static_fast['functions'];
 
+  // Most of the time, $type is passed as a string, so for performance,
+  // normalize it to that. When passed as an array, usually the first item in
+  // the array is a generic type, and additional items in the array are more
+  // specific variants of it, as in the case of array('form', 'form_FORM_ID').
+  if (is_array($type)) {
+    $cid = implode(',', $type);
+    $extra_types = $type;
+    $type = array_shift($extra_types);
+    // Allow if statements in this function to use the faster isset() rather
+    // than !empty() both when $type is passed as a string, or as an array with
+    // one item.
+    if (empty($extra_types)) {
+      unset($extra_types);
+    }
+  }
+  else {
+    $cid = $type;
+  }
+
+
+  // Some alter hooks are invoked many times per page request, so statically
+  // cache the list of functions to call, and on subsequent calls, iterate
+  // through them quickly.
+  if (!isset($functions[$cid])) {
+    $functions[$cid] = array();
+    $hook = $type . '_alter';
+    $modules = module_implements($hook);
+    if (!isset($extra_types)) {
+      // For the more common case of a single hook, we do not need to call
+      // function_exists(), since module_implements() returns only modules with
+      // implementations.
+      foreach ($modules as $module) {
+        $functions[$cid][] = $module . '_' . $hook;
+      }
+    }
+    else {
+      // For multiple hooks, we need $modules to contain every module that
+      // implements at least one of them.
+      $extra_modules = array();
+      foreach ($extra_types as $extra_type) {
+        $extra_modules = array_merge($extra_modules, module_implements($extra_type . '_alter'));
+      }
+      // If any modules implement one of the extra hooks that do not implement
+      // the primary hook, we need to add them to the $modules array in their
+      // appropriate order.
+      if (array_diff($extra_modules, $modules)) {
+        // Order the modules by the order returned by module_list().
+        $modules = array_intersect(module_list(), array_merge($modules, $extra_modules));
+      }
+      foreach ($modules as $module) {
+        // Since $modules is a merged array, for any given module, we do not
+        // know whether it has any particular implementation, so we need a
+        // function_exists().
+        $function = $module . '_' . $hook;
+        if (function_exists($function)) {
+          $functions[$cid][] = $function;
+        }
+        foreach ($extra_types as $extra_type) {
+          $function = $module . '_' . $extra_type . '_alter';
+          if (function_exists($function)) {
+            $functions[$cid][] = $function;
+          }
+        }
+      }
+    }
+  }
+
+  foreach ($functions[$cid] as $function) {
+    $function($data, $context1, $context2);
+  }
+}
 
 /**
  * The following utility functions are simply convenience wrappers.
@@ -778,140 +857,5 @@ function dbtng_ignore_slave() {
     $duration = variable_get('maximum_replication_lag', 300);
     // Set session variable with amount of time to delay before using slave.
     $_SESSION['ignore_slave_server'] = REQUEST_TIME + $duration;
-  }
-}
-
-/**
- * Backported from Drupal 7. 
- *
- * Process a URL query parameter array to remove unwanted elements.
- *
- * @param $query
- *   (optional) An array to be processed. Defaults to $_GET.
- * @param $exclude
- *   (optional) A list of $query array keys to remove. Use "parent[child]" to
- *   exclude nested items. Defaults to array('q').
- * @param $parent
- *   Internal use only. Used to build the $query array key for nested items.
- *
- * @return
- *   An array containing query parameters, which can be used for url().
- */
-function drupal_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
-  // Set defaults, if none given.
-  if (!isset($query)) {
-    $query = $_GET;
-  }
-  // If $exclude is empty, there is nothing to filter.
-  if (empty($exclude)) {
-    return $query;
-  }
-  elseif (!$parent) {
-    $exclude = array_flip($exclude);
-  }
-
-  $params = array();
-  foreach ($query as $key => $value) {
-    $string_key = ($parent ? $parent . '[' . $key . ']' : $key);
-    if (isset($exclude[$string_key])) {
-      continue;
-    }
-
-    if (is_array($value)) {
-      $params[$key] = drupal_get_query_parameters($value, $exclude, $string_key);
-    }
-    else {
-      $params[$key] = $value;
-    }
-  }
-
-  return $params;
-}
-
-/**
- * @} End of "defgroup dbtng".
- */
-
-/**
- * Backport of D7's drupal_alter(), which allows hook_query_alter() and
- * hook_query_TAG_alter() to work properly.
- */
-function dbtng_drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['functions'] = NULL;
-  }
-  $functions = &$drupal_static_fast['functions'];
-
-  // Most of the time, $type is passed as a string, so for performance,
-  // normalize it to that. When passed as an array, usually the first item in
-  // the array is a generic type, and additional items in the array are more
-  // specific variants of it, as in the case of array('form', 'form_FORM_ID').
-  if (is_array($type)) {
-    $cid = implode(',', $type);
-    $extra_types = $type;
-    $type = array_shift($extra_types);
-    // Allow if statements in this function to use the faster isset() rather
-    // than !empty() both when $type is passed as a string, or as an array with
-    // one item.
-    if (empty($extra_types)) {
-      unset($extra_types);
-    }
-  }
-  else {
-    $cid = $type;
-  }
-
-
-  // Some alter hooks are invoked many times per page request, so statically
-  // cache the list of functions to call, and on subsequent calls, iterate
-  // through them quickly.
-  if (!isset($functions[$cid])) {
-    $functions[$cid] = array();
-    $hook = $type . '_alter';
-    $modules = module_implements($hook);
-    if (!isset($extra_types)) {
-      // For the more common case of a single hook, we do not need to call
-      // function_exists(), since module_implements() returns only modules with
-      // implementations.
-      foreach ($modules as $module) {
-        $functions[$cid][] = $module . '_' . $hook;
-      }
-    }
-    else {
-      // For multiple hooks, we need $modules to contain every module that
-      // implements at least one of them.
-      $extra_modules = array();
-      foreach ($extra_types as $extra_type) {
-        $extra_modules = array_merge($extra_modules, module_implements($extra_type . '_alter'));
-      }
-      // If any modules implement one of the extra hooks that do not implement
-      // the primary hook, we need to add them to the $modules array in their
-      // appropriate order.
-      if (array_diff($extra_modules, $modules)) {
-        // Order the modules by the order returned by module_list().
-        $modules = array_intersect(module_list(), array_merge($modules, $extra_modules));
-      }
-      foreach ($modules as $module) {
-        // Since $modules is a merged array, for any given module, we do not
-        // know whether it has any particular implementation, so we need a
-        // function_exists().
-        $function = $module . '_' . $hook;
-        if (function_exists($function)) {
-          $functions[$cid][] = $function;
-        }
-        foreach ($extra_types as $extra_type) {
-          $function = $module . '_' . $extra_type . '_alter';
-          if (function_exists($function)) {
-            $functions[$cid][] = $function;
-          }
-        }
-      }
-    }
-  }
-
-  foreach ($functions[$cid] as $function) {
-    $function($data, $context1, $context2);
   }
 }
