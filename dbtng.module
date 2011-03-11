@@ -144,6 +144,12 @@ function dbtng_drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL)
 }
 
 /**
+ * @defgroup dbtng PDO Database abstraction layer
+ * @{
+ */
+
+
+/**
  * The following utility functions are simply convenience wrappers.
  * They should never, ever have any database-specific code in them.
  */
@@ -859,3 +865,7 @@ function dbtng_ignore_slave() {
     $_SESSION['ignore_slave_server'] = REQUEST_TIME + $duration;
   }
 }
+
+/**
+ * @} End of "defgroup dbtng".
+ */

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @ingroup database
+ * @ingroup dbtng
  * @{
  */
 
@@ -103,5 +103,5 @@ class TruncateQuery_mysql extends TruncateQuery {
 }
 
 /**
- * @} End of "ingroup database".
+ * @} End of "ingroup dbtng".
  */
