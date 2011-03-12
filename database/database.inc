@@ -9,9 +9,12 @@
  * file only, as they cannot auto-load the way classes can.
  */
 
+ /**
+  * @ingroup dbtng
+  * @{
+  */
+
 /**
- * @defgroup database Database abstraction layer
- * @{
  * Allow the use of different database servers using the same code base.
  *
  * Drupal provides a database abstraction layer to provide developers with
@@ -1402,6 +1405,10 @@ abstract class Database {
   final public static function parseConnectionInfo() {
     global $databases;
 
+    if (empty(self::$databaseInfo)) {
+      dbtng_load_connection_info();
+    }
+
     $database_info = is_array($databases) ? $databases : array();
     foreach ($database_info as $index => $info) {
       foreach ($database_info[$index] as $target => $value) {
@@ -1568,7 +1575,7 @@ abstract class Database {
     // We cannot rely on the registry yet, because the registry requires an
     // open database connection.
     $driver_class = 'DatabaseConnection_' . $driver;
-    require_once DRUPAL_ROOT . '/includes/database/' . $driver . '/database.inc';
+    require_once drupal_get_path('module', 'dbtng') . '/database/' . $driver . '/database.inc';
     $new_connection = new $driver_class(self::$databaseInfo[$key][$target]);
     $new_connection->setTarget($target);
     $new_connection->setKey($key);
@@ -2177,22 +2184,6 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
 }
 
 /**
- * The following utility functions are simply convenience wrappers.
- *
- * They should never, ever have any database-specific code in them.
- */
-
-/**
- * @} End of "defgroup database".
- */
-
-
-/**
- * @ingroup schemaapi
- * @{
- */
-
-/**
- * @} End of "ingroup schemaapi".
+ * @} End of "ingroup dbtng".
  */
 

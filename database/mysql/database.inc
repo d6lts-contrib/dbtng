@@ -6,7 +6,7 @@
  */
 
 /**
- * @ingroup database
+ * @ingroup dbtng
  * @{
  */
 
@@ -137,5 +137,5 @@ class DatabaseConnection_mysql extends DatabaseConnection {
 
 
 /**
- * @} End of "ingroup database".
+ * @} End of "ingroup dbtng".
  */

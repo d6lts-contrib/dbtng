@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @ingroup database
+ * @ingroup dbtng
  * @{
  */
 
@@ -207,3 +207,7 @@ class UpdateQuery_pgsql extends UpdateQuery {
     return $stmt->rowCount();
   }
 }
+
+/**
+ * @} End of "ingroup dbtng".
+ */

@@ -6,7 +6,7 @@
  */
 
 /**
- * @ingroup database
+ * @ingroup dbtng
  * @{
  */
 
@@ -156,5 +156,5 @@ class TruncateQuery_sqlite extends TruncateQuery {
 }
 
 /**
- * @} End of "ingroup database".
+ * @} End of "ingroup dbtng".
  */

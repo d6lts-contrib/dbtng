@@ -6,7 +6,7 @@
  */
 
 /**
- * @ingroup database
+ * @ingroup dbtng
  * @{
  */
 
@@ -21,7 +21,7 @@ class SelectQuery_sqlite extends SelectQuery {
 }
 
 /**
- * @} End of "ingroup database".
+ * @} End of "ingroup dbtng".
  */
 
 
