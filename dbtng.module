@@ -144,12 +144,6 @@ function dbtng_drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL)
 }
 
 /**
- * @defgroup dbtng PDO Database abstraction layer
- * @{
- */
-
-
-/**
  * The following utility functions are simply convenience wrappers.
  * They should never, ever have any database-specific code in them.
  */
@@ -865,54 +859,3 @@ function dbtng_ignore_slave() {
     $_SESSION['ignore_slave_server'] = REQUEST_TIME + $duration;
   }
 }
-
-/**
- * Backported from Drupal 7. 
- *
- * Process a URL query parameter array to remove unwanted elements.
- *
- * @param $query
- *   (optional) An array to be processed. Defaults to $_GET.
- * @param $exclude
- *   (optional) A list of $query array keys to remove. Use "parent[child]" to
- *   exclude nested items. Defaults to array('q').
- * @param $parent
- *   Internal use only. Used to build the $query array key for nested items.
- *
- * @return
- *   An array containing query parameters, which can be used for url().
- */
-function drupal_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
-  // Set defaults, if none given.
-  if (!isset($query)) {
-    $query = $_GET;
-  }
-  // If $exclude is empty, there is nothing to filter.
-  if (empty($exclude)) {
-    return $query;
-  }
-  elseif (!$parent) {
-    $exclude = array_flip($exclude);
-  }
-
-  $params = array();
-  foreach ($query as $key => $value) {
-    $string_key = ($parent ? $parent . '[' . $key . ']' : $key);
-    if (isset($exclude[$string_key])) {
-      continue;
-    }
-
-    if (is_array($value)) {
-      $params[$key] = drupal_get_query_parameters($value, $exclude, $string_key);
-    }
-    else {
-      $params[$key] = $value;
-    }
-  }
-
-  return $params;
-}
-
-/**
- * @} End of "defgroup dbtng".
- */
