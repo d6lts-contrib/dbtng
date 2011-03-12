@@ -215,3 +215,17 @@ function database_test_schema() {
 
   return $schema;
 }
+
+/**
+ * Implementation of hook_install().
+ */
+function database_test_install() {
+  drupal_install_schema('database_test');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function database_test_uninstall() {
+  drupal_uninstall_schema('database_test');
+}
