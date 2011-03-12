@@ -19,7 +19,7 @@ class DatabaseTestCase extends DrupalWebTestCase {
   protected $profile = 'testing';
 
   function setUp() {
-    parent::setUp('autoload', 'dbtng', 'database_test');
+    parent::setUp('database_test');
 
     $schema['test'] = drupal_get_schema('test');
     $schema['test_people'] = drupal_get_schema('test_people');
@@ -1517,7 +1517,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
     // same as the chance that a deck of cards will come out in the same order
     // after shuffling it (in other words, nearly impossible).
     $number_of_items = 52;
-    while (dbtng_query("SELECT MAX(id) FROM {test}")->fetchField() < $number_of_items) {
+    while (db_query("SELECT MAX(id) FROM {test}")->fetchField() < $number_of_items) {
       db_insert('test')->fields(array('name' => $this->randomName()))->execute();
     }
 
@@ -2136,6 +2136,70 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
     $this->assertNotEqual($crowded_job->name, $crowded_job->othername, t('Correctly joined same table twice.'));
   }
 
+}
+
+/**
+ * Test more complex select statements, part 2.
+ */
+class DatabaseSelectComplexTestCase2 extends DatabaseTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Select tests, complex 2',
+      'description' => 'Test the Select query builder with even more complex queries.',
+      'group' => 'Database',
+    );
+  }
+
+  function setUp() {
+    DrupalWebTestCase::setUp('database_test', 'node_access_test');
+
+    $schema['test'] = drupal_get_schema('test');
+    $schema['test_people'] = drupal_get_schema('test_people');
+    $schema['test_one_blob'] = drupal_get_schema('test_one_blob');
+    $schema['test_two_blobs'] = drupal_get_schema('test_two_blobs');
+    $schema['test_task'] = drupal_get_schema('test_task');
+
+    $this->installTables($schema);
+
+    $this->addSampleData();
+  }
+
+  /**
+   * Test that we can join on a query.
+   */
+  function testJoinSubquery() {
+    $acct = $this->drupalCreateUser(array('access content'));
+    $this->drupalLogin($acct);
+
+    $query = db_select('test_task', 'tt', array('target' => 'slave'));
+    $query->addExpression('tt.pid + 1', 'abc');
+    $query->condition('priority', 1, '>');
+    $query->condition('priority', 100, '<');
+
+    $subquery = db_select('test', 'tp');
+    $subquery->join('test_one_blob', 'tpb', 'tp.id = tpb.id');
+    $subquery->join('node', 'n', 'tp.id = n.nid');
+    $subquery->addTag('node_access');
+    $subquery->addMetaData('account', $acct);
+    $subquery->addField('tp', 'id');
+    $subquery->condition('age', 5, '>');
+    $subquery->condition('age', 500, '<');
+
+    $query->leftJoin($subquery, 'sq', 'tt.pid = sq.id');
+    $query->join('test_one_blob', 'tb3', 'tt.pid = tb3.id');
+
+    // Construct the query string.
+    // This is the same sequence that SelectQuery::execute() goes through.
+    $query->preExecute();
+    $query->getArguments();
+    $str = (string) $query;
+
+    // Verify that the string only has one copy of condition placeholder 0.
+    $pos = strpos($str, 'db_condition_placeholder_0', 0);
+    $pos2 = strpos($str, 'db_condition_placeholder_0', $pos + 1);
+    $this->assertFalse($pos2, "Condition placeholder is not repeated");
+  }
 }
 
 class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
@@ -2825,7 +2889,7 @@ class DatabaseSerializeQueryTestCase extends DatabaseTestCase {
 /**
  * Range query tests.
  */
-class DatabaseRangeQueryTestCase extends DatabaseTestCase {
+class DatabaseRangeQueryTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Range query test',
@@ -2856,7 +2920,7 @@ class DatabaseRangeQueryTestCase extends DatabaseTestCase {
 /**
  * Temporary query tests.
  */
-class DatabaseTemporaryQueryTestCase extends DatabaseTestCase {
+class DatabaseTemporaryQueryTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Temporary query test',
@@ -3302,7 +3366,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
 /**
  * Check the sequences API.
  */
-class DatabaseNextIdCase extends DatabaseTestCase {
+class DatabaseNextIdCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Sequences API'),
@@ -3329,7 +3393,7 @@ class DatabaseNextIdCase extends DatabaseTestCase {
 /**
  * Tests the empty pseudo-statement class.
  */
-class DatabaseEmptyStatementTestCase extends DatabaseTestCase {
+class DatabaseEmptyStatementTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => t('Empty statement'),

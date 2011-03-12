@@ -6,7 +6,7 @@
  */
 
 /**
- * @ingroup dbtng
+ * @ingroup database
  * @{
  */
 
@@ -88,18 +88,18 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   }
 
   public function nextId($existing_id = 0) {
-    $new_id = $this->query('INSERT INTO {dbtng_sequences} () VALUES ()', array(), array('return' => Database::RETURN_INSERT_ID));
+    $new_id = $this->query('INSERT INTO {sequences} () VALUES ()', array(), array('return' => Database::RETURN_INSERT_ID));
     // This should only happen after an import or similar event.
     if ($existing_id >= $new_id) {
-      // If we INSERT a value manually into the dbtng_sequences table, on the next
+      // If we INSERT a value manually into the sequences table, on the next
       // INSERT, MySQL will generate a larger value. However, there is no way
       // of knowing whether this value already exists in the table. MySQL
       // provides an INSERT IGNORE which would work, but that can mask problems
       // other than duplicate keys. Instead, we use INSERT ... ON DUPLICATE KEY
       // UPDATE in such a way that the UPDATE does not do anything. This way,
       // duplicate keys do not generate errors but everything else does.
-      $this->query('INSERT INTO {dbtng_sequences} (value) VALUES (:value) ON DUPLICATE KEY UPDATE value = value', array(':value' => $existing_id));
-      $new_id = $this->query('INSERT INTO {dbtng_sequences} () VALUES ()', array(), array('return' => Database::RETURN_INSERT_ID));
+      $this->query('INSERT INTO {sequences} (value) VALUES (:value) ON DUPLICATE KEY UPDATE value = value', array(':value' => $existing_id));
+      $new_id = $this->query('INSERT INTO {sequences} () VALUES ()', array(), array('return' => Database::RETURN_INSERT_ID));
     }
     if (!$this->shutdownRegistered) {
       // Use register_shutdown_function() here to keep the database system
@@ -120,9 +120,9 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // be a problem in this case. Also, TRUNCATE resets the auto increment
     // counter.
     try {
-      $max_id = $this->query('SELECT MAX(value) FROM {dbtng_sequences}')->fetchField();
+      $max_id = $this->query('SELECT MAX(value) FROM {sequences}')->fetchField();
       // We know we are using MySQL here, no need for the slower db_delete().
-      $this->query('DELETE FROM {dbtng_sequences} WHERE value < :value', array(':value' => $max_id));
+      $this->query('DELETE FROM {sequences} WHERE value < :value', array(':value' => $max_id));
     }
     // During testing, this function is called from shutdown with the
     // simpletest prefix stored in $this->connection, and those tables are gone
@@ -137,5 +137,5 @@ class DatabaseConnection_mysql extends DatabaseConnection {
 
 
 /**
- * @} End of "ingroup dbtng".
+ * @} End of "ingroup database".
  */

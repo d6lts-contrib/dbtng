@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @ingroup dbtng
+ * @ingroup database
  * @{
  */
 
@@ -1195,7 +1195,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
       foreach ($this->alterTags as $tag => $value) {
         $hooks[] = 'query_' . $tag;
       }
-      dbtng_drupal_alter($hooks, $query);
+      drupal_alter($hooks, $query);
     }
 
     $this->prepared = TRUE;
@@ -1569,5 +1569,5 @@ class SelectQuery extends Query implements SelectQueryInterface {
 }
 
 /**
- * @} End of "ingroup dbtng".
+ * @} End of "ingroup database".
  */

@@ -6,11 +6,11 @@
  */
 
 /**
- * @ingroup dbtng
+ * @ingroup database
  * @{
  */
 
-include_once drupal_get_path('module', 'dbtng') . '/database/prefetch.inc';
+include_once DRUPAL_ROOT . '/includes/database/prefetch.inc';
 
 /**
  * Specific SQLite implementation of DatabaseConnection.
@@ -275,17 +275,17 @@ class DatabaseConnection_sqlite extends DatabaseConnection {
     // and integers and no known databases require special handling for those
     // simple cases. If another transaction wants to write the same row, it will
     // wait until this transaction commits.
-    $stmt = $this->query('UPDATE {dbtng_sequences} SET value = GREATEST(value, :existing_id) + 1', array(
+    $stmt = $this->query('UPDATE {sequences} SET value = GREATEST(value, :existing_id) + 1', array(
       ':existing_id' => $existing_id,
     ));
     if (!$stmt->rowCount()) {
-      $this->query('INSERT INTO {dbtng_sequences} (value) VALUES (:existing_id + 1)', array(
+      $this->query('INSERT INTO {sequences} (value) VALUES (:existing_id + 1)', array(
         ':existing_id' => $existing_id,
       ));
     }
     // The transaction gets committed when the transaction object gets destroyed
     // because it gets out of scope.
-    return $this->query('SELECT value FROM {dbtng_sequences}')->fetchField();
+    return $this->query('SELECT value FROM {sequences}')->fetchField();
   }
 
   public function rollback($savepoint_name = 'drupal_transaction') {
@@ -507,5 +507,5 @@ class DatabaseStatement_sqlite extends DatabaseStatementPrefetch implements Iter
 }
 
 /**
- * @} End of "ingroup dbtng".
+ * @} End of "ingroup database".
  */
