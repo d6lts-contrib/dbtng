@@ -4,9 +4,3 @@ description = Drupal 7 database
 ; Compatability and dependencies
 core = 6.x
 php = 5.2
-dependencies[] = autoload
-
-; Autoload information
-files[] = database/database.inc
-files[] = includes/pager.inc
-files[] = includes/tablesort.inc

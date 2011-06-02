@@ -9,7 +9,46 @@
  */
 
 /**
- * Implementation of hook_init().
+ * Implementation of hook_boot().
+ */
+function dbtng_boot() {
+  spl_autoload_register('dbtng_autoload');
+}
+
+/**
+ * Autoload implementation for classes that DBTNG does not load based on driver.
+ */
+function dbtng_autoload($item) {
+  $items = array(
+    'DatabaseDriverNotSpecifiedException' => 'database/database.inc',
+    'DatabaseTransaction' => 'database/database.inc',
+    'DatabaseStatementInterface' => 'database/database.inc',
+    'DatabaseStatementBase' => 'database/database.inc',
+    'DatabaseStatementEmpty' => 'database/database.inc',
+    'PagerDefault' => 'includes/pager.inc',
+    'TableSort' => 'includes/tablesort.inc',
+    'DatabaseConnectionNotDefinedException' => 'database/database.inc',
+    'NoFieldsException' => 'database/database.inc',
+    'FieldsOverlapException' => 'database/database.inc',
+    'InvalidMergeQueryException' => 'database/database.inc',
+    'DatabaseTransactionExplicitCommitNotAllowedException' => 'database/database.inc',
+    'DatabaseTransactionCommitFailedException' => 'database/database.inc',
+    'DatabaseTransactionNameNonUniqueException' => 'database/database.inc',
+    'DatabaseTransactionNoActiveException' => 'database/database.inc',
+    'Database' => 'database/database.inc',
+    'DatabaseConnection' => 'database/database.inc'
+  );
+
+  if (array_key_exists($item, $items)) {
+    require_once dirname(__FILE__) .'/'. $items[$item];
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Parse connection info from Drupal 6's $db_url global into $databases global
+ * used by DBTNG. Called on demand in Databse::ParseConnectionInfo.
  */
 function dbtng_load_connection_info() {
   global $db_url, $databases;
@@ -41,7 +80,14 @@ function dbtng_get_db_settings($connect_url) {
   $info = parse_url($connect_url);
 
   $info['scheme'] = ($info['scheme'] == 'mysqli') ? 'mysql' : $info['scheme'];
-  $info['path'] = str_replace('/', '', $info['path']);
+
+  if (!empty($info['path'])) {
+    $info['path'] = str_replace('/', '', $info['path']);
+  }
+  else {
+    $info['path'] = NULL;
+  }
+
   if (empty($info['port'])) {
     // provide a default port if it's not explicit on $connect_url
     $info['port'] = getservbyname($info['scheme'], 'tcp');
