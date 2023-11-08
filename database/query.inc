@@ -585,7 +585,7 @@ class InsertQuery extends Query {
     if (!empty($this->fromQuery)) {
       $sql = (string) $this;
       // The SelectQuery may contain arguments, load and pass them through.
-      return $this->connection->query($sql, $this->fromQuery->getArguments(), $this->queryOptions);
+      return $this->connection->runQuery($sql, $this->fromQuery->getArguments(), $this->queryOptions);
     }
 
     $last_insert_id = 0;
@@ -598,7 +598,7 @@ class InsertQuery extends Query {
     try {
       $sql = (string) $this;
       foreach ($this->insertValues as $insert_values) {
-        $last_insert_id = $this->connection->query($sql, $insert_values, $this->queryOptions);
+        $last_insert_id = $this->connection->runQuery($sql, $insert_values, $this->queryOptions);
       }
     }
     catch (Exception $e) {
@@ -805,7 +805,7 @@ class DeleteQuery extends Query implements QueryConditionInterface {
       $values = $this->condition->arguments();
     }
 
-    return $this->connection->query((string) $this, $values, $this->queryOptions);
+    return $this->connection->runQuery((string) $this, $values, $this->queryOptions);
   }
 
   /**
@@ -874,7 +874,7 @@ class TruncateQuery extends Query {
    *   Return value is dependent on the database type.
    */
   public function execute() {
-    return $this->connection->query((string) $this, array(), $this->queryOptions);
+    return $this->connection->runQuery((string) $this, array(), $this->queryOptions);
   }
 
   /**
@@ -1101,7 +1101,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
       $update_values = array_merge($update_values, $this->condition->arguments());
     }
 
-    return $this->connection->query((string) $this, $update_values, $this->queryOptions);
+    return $this->connection->runQuery((string) $this, $update_values, $this->queryOptions);
   }
 
   /**
